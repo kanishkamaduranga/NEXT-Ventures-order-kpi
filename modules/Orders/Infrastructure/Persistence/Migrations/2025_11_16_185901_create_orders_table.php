@@ -12,13 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('customer_id');
+            $table->id();
+            $table->unsignedBigInteger('customer_id');
             $table->string('order_number')->unique();
             $table->enum('status', [
                 'pending',
                 'reserved',
+                'reserving_stock',
+                'stock_reserved',
+                'stock_reservation_failed',
+                'processing_payment',
+                'payment_succeeded',
+                'payment_failed',
                 'paid',
+                'completed',
+                'cancelled',
                 'failed',
                 'refunded',
                 'partially_refunded'

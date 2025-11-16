@@ -1,15 +1,16 @@
 <?php
+// modules/Orders/Domain/Models/Order.php
 
 namespace Modules\Orders\Domain\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Orders\Domain\Events\OrderProcessStarted;
 
 class Order extends Model
 {
-    use HasUuids, SoftDeletes;
+    use SoftDeletes;
 
     protected $table = 'orders';
 
@@ -40,5 +41,36 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
-}
 
+    /**
+     * Start the order processing workflow
+     */
+    public function startProcessing(): void
+    {
+        event(new OrderProcessStarted($this));
+    }
+
+    /**
+     * Check if order can be processed
+     */
+    public function canBeProcessed(): bool
+    {
+        return in_array($this->status, ['pending', 'reserved']);
+    }
+
+    /**
+     * Check if order is completed successfully
+     */
+    public function isCompleted(): bool
+    {
+        return $this->status === 'completed';
+    }
+
+    /**
+     * Check if order failed
+     */
+    public function isFailed(): bool
+    {
+        return in_array($this->status, ['cancelled', 'stock_reservation_failed', 'payment_failed']);
+    }
+}

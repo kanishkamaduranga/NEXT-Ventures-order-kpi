@@ -9,7 +9,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Modules\Orders\Domain\Models\Order;
 use Modules\Orders\Domain\Models\OrderItem;
 
@@ -175,8 +174,7 @@ class ImportOrdersJob implements ShouldQueue
 
             // Create order
             $order = Order::create([
-                'id' => Str::uuid(),
-                'customer_id' => $customerId,
+                'customer_id' => (int) $customerId,
                 'order_number' => $orderNumber,
                 'status' => strtolower($status),
                 'total_amount' => $totalAmount,
@@ -194,9 +192,8 @@ class ImportOrdersJob implements ShouldQueue
             // Create order items
             foreach ($items as $itemData) {
                 OrderItem::create([
-                    'id' => Str::uuid(),
                     'order_id' => $order->id,
-                    'product_id' => $itemData['product_id'],
+                    'product_id' => (int) $itemData['product_id'],
                     'product_name' => $itemData['product_name'],
                     'sku' => $itemData['sku'],
                     'quantity' => $itemData['quantity'],

@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 
 class GenerateSampleOrders extends Command
 {
@@ -11,29 +10,29 @@ class GenerateSampleOrders extends Command
     protected $description = 'Generate a sample CSV file for orders import';
 
     protected $products = [
-        ['id' => null, 'sku' => 'PROD-001', 'name' => 'Laptop', 'price' => 150.50],
-        ['id' => null, 'sku' => 'PROD-002', 'name' => 'Smartphone', 'price' => 299.99],
-        ['id' => null, 'sku' => 'PROD-003', 'name' => 'Headphones', 'price' => 37.63],
-        ['id' => null, 'sku' => 'PROD-004', 'name' => 'Tablet', 'price' => 450.00],
-        ['id' => null, 'sku' => 'PROD-005', 'name' => 'Keyboard', 'price' => 89.99],
-        ['id' => null, 'sku' => 'PROD-006', 'name' => 'Mouse', 'price' => 41.92],
-        ['id' => null, 'sku' => 'PROD-007', 'name' => 'Monitor', 'price' => 199.99],
-        ['id' => null, 'sku' => 'PROD-008', 'name' => 'Webcam', 'price' => 65.50],
-        ['id' => null, 'sku' => 'PROD-009', 'name' => 'Speaker', 'price' => 87.63],
-        ['id' => null, 'sku' => 'PROD-010', 'name' => 'Microphone', 'price' => 120.00],
+        ['id' => 1, 'sku' => 'PROD-001', 'name' => 'Laptop', 'price' => 150.50],
+        ['id' => 2, 'sku' => 'PROD-002', 'name' => 'Smartphone', 'price' => 299.99],
+        ['id' => 3, 'sku' => 'PROD-003', 'name' => 'Headphones', 'price' => 37.63],
+        ['id' => 4, 'sku' => 'PROD-004', 'name' => 'Tablet', 'price' => 450.00],
+        ['id' => 5, 'sku' => 'PROD-005', 'name' => 'Keyboard', 'price' => 89.99],
+        ['id' => 6, 'sku' => 'PROD-006', 'name' => 'Mouse', 'price' => 41.92],
+        ['id' => 7, 'sku' => 'PROD-007', 'name' => 'Monitor', 'price' => 199.99],
+        ['id' => 8, 'sku' => 'PROD-008', 'name' => 'Webcam', 'price' => 65.50],
+        ['id' => 9, 'sku' => 'PROD-009', 'name' => 'Speaker', 'price' => 87.63],
+        ['id' => 10, 'sku' => 'PROD-010', 'name' => 'Microphone', 'price' => 120.00],
     ];
 
     protected $customers = [
-        ['id' => null, 'name' => 'John Doe', 'email' => 'john.doe@example.com'],
-        ['id' => null, 'name' => 'Jane Smith', 'email' => 'jane.smith@example.com'],
-        ['id' => null, 'name' => 'Mike Wilson', 'email' => 'mike.wilson@example.com'],
-        ['id' => null, 'name' => 'Sarah Jones', 'email' => 'sarah.jones@example.com'],
-        ['id' => null, 'name' => 'Adam Brown', 'email' => 'adam.brown@example.com'],
-        ['id' => null, 'name' => 'Lisa Taylor', 'email' => 'lisa.taylor@example.com'],
-        ['id' => null, 'name' => 'Tom Harris', 'email' => 'tom.harris@example.com'],
-        ['id' => null, 'name' => 'Emily White', 'email' => 'emily.white@example.com'],
-        ['id' => null, 'name' => 'David Miller', 'email' => 'david.miller@example.com'],
-        ['id' => null, 'name' => 'Susan Davis', 'email' => 'susan.davis@example.com'],
+        ['id' => 1001, 'name' => 'John Doe', 'email' => 'john.doe@example.com'],
+        ['id' => 1002, 'name' => 'Jane Smith', 'email' => 'jane.smith@example.com'],
+        ['id' => 1003, 'name' => 'Mike Wilson', 'email' => 'mike.wilson@example.com'],
+        ['id' => 1004, 'name' => 'Sarah Jones', 'email' => 'sarah.jones@example.com'],
+        ['id' => 1005, 'name' => 'Adam Brown', 'email' => 'adam.brown@example.com'],
+        ['id' => 1006, 'name' => 'Lisa Taylor', 'email' => 'lisa.taylor@example.com'],
+        ['id' => 1007, 'name' => 'Tom Harris', 'email' => 'tom.harris@example.com'],
+        ['id' => 1008, 'name' => 'Emily White', 'email' => 'emily.white@example.com'],
+        ['id' => 1009, 'name' => 'David Miller', 'email' => 'david.miller@example.com'],
+        ['id' => 1010, 'name' => 'Susan Davis', 'email' => 'susan.davis@example.com'],
     ];
 
     protected $statuses = ['pending', 'reserved', 'paid', 'failed', 'refunded', 'partially_refunded'];
@@ -44,9 +43,6 @@ class GenerateSampleOrders extends Command
         $filename = $this->argument('filename');
 
         $this->info("Generating {$count} sample orders...");
-
-        // Initialize UUIDs for products and customers
-        $this->initializeUuids();
 
         // Build CSV header
         // Format: order_number, customer_id, customer_name, customer_email, status, total_amount, currency,
@@ -142,23 +138,5 @@ class GenerateSampleOrders extends Command
         $this->info("You can now run: php artisan orders:import {$filePath}");
 
         return Command::SUCCESS;
-    }
-
-    /**
-     * Initialize UUIDs for products and customers if not already set
-     */
-    protected function initializeUuids(): void
-    {
-        foreach ($this->products as &$product) {
-            if (empty($product['id'])) {
-                $product['id'] = Str::uuid()->toString();
-            }
-        }
-
-        foreach ($this->customers as &$customer) {
-            if (empty($customer['id'])) {
-                $customer['id'] = Str::uuid()->toString();
-            }
-        }
     }
 }
