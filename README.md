@@ -1,58 +1,317 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# NEXT Ventures Order KPI System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel-based order management and analytics system with real-time KPI tracking and customer leaderboards.
 
-## About Laravel
+## Overview
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+This application provides a comprehensive order processing system with:
+- **Order Management**: Import, process, and track orders through a complete workflow
+- **Real-time Analytics**: Daily KPIs (revenue, order count, AOV) and customer leaderboards
+- **Order Notifications**: Automated email and log notifications for order events
+- **Queue Management**: Laravel Horizon for monitoring and managing Redis queues
+- **Process Management**: Supervisor for keeping queue workers running in production
+- **Event-Driven Architecture**: Decoupled modules using Laravel events
+- **Domain-Driven Design**: Clean architecture with clear separation of concerns
+- **Redis-Powered Analytics**: High-performance analytics using Redis data structures
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Orders Module
+- CSV import of large order files using queued jobs
+- Order processing workflow: stock reservation → payment → finalization/rollback
+- Event-driven state management
+- Simulated payment gateway and stock reservation services
+- Support for multiple order statuses and failure handling
 
-## Learning Laravel
+### Analytics Module
+- Daily KPIs: revenue, order count, average order value, conversion rate, unique customers
+- Real-time customer leaderboard
+- Redis-based storage for high performance
+- Historical data tracking (30-day retention)
+- HTTP API endpoints for data retrieval
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Notifications Module
+- Automated notifications for order completion and failures
+- Multiple channels: Email and Log
+- Queued notification jobs to avoid blocking workflow
+- Complete notification history with audit trail
+- Event-driven integration with Orders module
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Tech Stack
 
-## Laravel Sponsors
+- **Framework**: Laravel 12.x
+- **PHP**: 8.2+
+- **Database**: MySQL 8.0
+- **Cache/Queue**: Redis
+- **Queue Management**: Laravel Horizon
+- **Process Management**: Supervisor (Production)
+- **Containerization**: Docker & Laravel Sail
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Getting Started
 
-### Premium Partners
+### Prerequisites
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- Docker & Docker Compose
+- PHP 8.2+ (if running locally)
+- Composer
 
-## Contributing
+### Installation
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd NEXT-Ventures-order-kpi
+```
 
-## Code of Conduct
+2. Install dependencies:
+```bash
+composer install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. Copy environment file:
+```bash
+cp .env.example .env
+```
 
-## Security Vulnerabilities
+4. Start Docker containers:
+```bash
+./vendor/bin/sail up -d
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+5. Generate application key:
+```bash
+./vendor/bin/sail artisan key:generate
+```
+
+6. Run migrations:
+```bash
+./vendor/bin/sail artisan migrate
+```
+
+### Services
+
+- **Laravel Application**: http://localhost:8088
+- **Laravel Horizon Dashboard**: http://localhost:8088/horizon
+- **MySQL**: localhost:3308
+- **Redis**: localhost:6379
+- **Adminer** (Database UI): http://localhost:8089
+
+## Usage
+
+### Import Orders
+
+```bash
+# Generate sample orders CSV
+php artisan orders:generate-sample
+
+# Import orders from CSV (queued)
+php artisan orders:import storage/app/orders.csv
+```
+
+### Process Orders
+
+```bash
+# Process a specific order through the workflow
+php artisan orders:process {order_id}
+```
+
+### Analytics
+
+```bash
+# Generate daily analytics report
+php artisan analytics:daily-report [date]
+
+# Backfill KPIs from existing orders
+php artisan analytics:backfill-kpis --days=30
+```
+
+## API Endpoints
+
+### Analytics API
+
+All endpoints return JSON responses and are prefixed with `/api/v1`.
+
+#### Get Daily Report
+```
+GET /api/v1/analytics/daily/{date}
+```
+
+Returns daily KPIs and leaderboard for a specific date.
+
+**Example:**
+```bash
+curl http://localhost:8088/api/v1/analytics/daily/2025-11-16
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "kpis": {
+      "date": "2025-11-16",
+      "total_revenue": 15234.50,
+      "order_count": 125,
+      "successful_orders": 118,
+      "failed_orders": 7,
+      "average_order_value": 129.11,
+      "conversion_rate": 94.40,
+      "unique_customers": 95,
+      "refund_amount": 0.00
+    },
+    "leaderboard": [
+      {
+        "rank": 1,
+        "customer_id": "1005",
+        "total_spent": 1523.45
+      }
+    ],
+    "date": "2025-11-16",
+    "generated_at": "2025-11-17T09:40:27.932567Z"
+  }
+}
+```
+
+#### Get Leaderboard
+```
+GET /api/v1/analytics/leaderboard/{date}?limit=10
+```
+
+Returns top customers leaderboard for a specific date.
+
+**Parameters:**
+- `limit` (optional): Number of top customers to return (default: 10, max: 100)
+
+**Example:**
+```bash
+curl http://localhost:8088/api/v1/analytics/leaderboard/2025-11-16?limit=20
+```
+
+#### Get KPIs for Date Range
+```
+GET /api/v1/analytics/kpis?start_date=2025-11-01&end_date=2025-11-17
+```
+
+Returns KPIs aggregated for a date range.
+
+**Parameters:**
+- `start_date` (required): Start date (YYYY-MM-DD)
+- `end_date` (optional): End date (YYYY-MM-DD, default: today)
+
+**Example:**
+```bash
+curl "http://localhost:8088/api/v1/analytics/kpis?start_date=2025-11-01&end_date=2025-11-17"
+```
+
+## Project Structure
+
+```
+├── app/                    # Laravel application core
+├── modules/                # Domain modules
+│   ├── Orders/            # Orders module
+│   │   ├── Application/   # Use cases, jobs, commands
+│   │   ├── Domain/        # Models, events, interfaces
+│   │   ├── Infrastructure/# Repositories, services, migrations
+│   │   └── Interfaces/    # HTTP controllers, console commands
+│   └── Analytics/         # Analytics module
+│       ├── Application/   # Use cases, DTOs
+│       ├── Domain/        # Entities, repositories
+│       ├── Infrastructure/# Redis repositories, listeners
+│       └── Interfaces/    # HTTP controllers, console commands
+├── routes/                # Route definitions
+├── database/              # Migrations, seeders
+└── compose.yaml           # Docker Compose configuration
+```
+
+## Module Documentation
+
+- [Orders Module Documentation](modules/Orders/README.md)
+- [Analytics Module Documentation](modules/Analytics/README.md)
+- [Notifications Module Documentation](modules/Notifications/README.md)
+
+## Development
+
+### Running Tests
+
+```bash
+./vendor/bin/sail artisan test
+```
+
+### Code Style
+
+```bash
+./vendor/bin/sail pint
+```
+
+### Queue Management
+
+#### Laravel Horizon (Recommended)
+
+Laravel Horizon provides a dashboard and monitoring for Redis queues.
+
+**Start Horizon:**
+```bash
+./vendor/bin/sail artisan horizon
+```
+
+**Access Horizon Dashboard:**
+- URL: http://localhost:8088/horizon
+- Authentication: Configured in `AppServiceProvider` (currently open for local development)
+- **Production**: Update `Horizon::auth()` in `AppServiceProvider` to implement proper authentication
+
+**Horizon Commands:**
+```bash
+# Start Horizon
+./vendor/bin/sail artisan horizon
+
+# Pause Horizon
+./vendor/bin/sail artisan horizon:pause
+
+# Continue Horizon
+./vendor/bin/sail artisan horizon:continue
+
+# Terminate Horizon
+./vendor/bin/sail artisan horizon:terminate
+
+# Clear metrics
+./vendor/bin/sail artisan horizon:clear
+```
+
+#### Traditional Queue Worker
+
+For non-Redis queues (database driver):
+
+```bash
+./vendor/bin/sail artisan queue:work
+```
+
+#### Supervisor (Production)
+
+For production environments, use Supervisor to keep Horizon running automatically.
+
+**Setup:**
+1. Install Supervisor on your server
+2. Copy configuration files from `docker/supervisor/`
+3. See `docker/supervisor/README.md` for detailed instructions
+
+**Configuration Files:**
+- `docker/supervisor/supervisord.conf` - Main Supervisor config
+- `docker/supervisor/laravel-horizon.conf` - Horizon worker config
+
+**Supervisor Commands:**
+```bash
+# Start Horizon via Supervisor
+sudo supervisorctl start laravel-horizon
+
+# Stop Horizon
+sudo supervisorctl stop laravel-horizon
+
+# Restart Horizon
+sudo supervisorctl restart laravel-horizon
+
+# Check status
+sudo supervisorctl status
+```
 
 ## License
 
