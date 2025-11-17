@@ -7,6 +7,8 @@ A Laravel-based order management and analytics system with real-time KPI trackin
 This application provides a comprehensive order processing system with:
 - **Order Management**: Import, process, and track orders through a complete workflow
 - **Real-time Analytics**: Daily KPIs (revenue, order count, AOV) and customer leaderboards
+- **Queue Management**: Laravel Horizon for monitoring and managing Redis queues
+- **Process Management**: Supervisor for keeping queue workers running in production
 - **Event-Driven Architecture**: Decoupled modules using Laravel events
 - **Domain-Driven Design**: Clean architecture with clear separation of concerns
 - **Redis-Powered Analytics**: High-performance analytics using Redis data structures
@@ -33,6 +35,8 @@ This application provides a comprehensive order processing system with:
 - **PHP**: 8.2+
 - **Database**: MySQL 8.0
 - **Cache/Queue**: Redis
+- **Queue Management**: Laravel Horizon
+- **Process Management**: Supervisor (Production)
 - **Containerization**: Docker & Laravel Sail
 
 ## Getting Started
@@ -79,6 +83,7 @@ cp .env.example .env
 ### Services
 
 - **Laravel Application**: http://localhost:8088
+- **Laravel Horizon Dashboard**: http://localhost:8088/horizon
 - **MySQL**: localhost:3308
 - **Redis**: localhost:6379
 - **Adminer** (Database UI): http://localhost:8089
@@ -229,10 +234,74 @@ curl "http://localhost:8088/api/v1/analytics/kpis?start_date=2025-11-01&end_date
 ./vendor/bin/sail pint
 ```
 
-### Queue Workers
+### Queue Management
+
+#### Laravel Horizon (Recommended)
+
+Laravel Horizon provides a dashboard and monitoring for Redis queues.
+
+**Start Horizon:**
+```bash
+./vendor/bin/sail artisan horizon
+```
+
+**Access Horizon Dashboard:**
+- URL: http://localhost:8088/horizon
+- Authentication: Configured in `AppServiceProvider` (currently open for local development)
+- **Production**: Update `Horizon::auth()` in `AppServiceProvider` to implement proper authentication
+
+**Horizon Commands:**
+```bash
+# Start Horizon
+./vendor/bin/sail artisan horizon
+
+# Pause Horizon
+./vendor/bin/sail artisan horizon:pause
+
+# Continue Horizon
+./vendor/bin/sail artisan horizon:continue
+
+# Terminate Horizon
+./vendor/bin/sail artisan horizon:terminate
+
+# Clear metrics
+./vendor/bin/sail artisan horizon:clear
+```
+
+#### Traditional Queue Worker
+
+For non-Redis queues (database driver):
 
 ```bash
 ./vendor/bin/sail artisan queue:work
+```
+
+#### Supervisor (Production)
+
+For production environments, use Supervisor to keep Horizon running automatically.
+
+**Setup:**
+1. Install Supervisor on your server
+2. Copy configuration files from `docker/supervisor/`
+3. See `docker/supervisor/README.md` for detailed instructions
+
+**Configuration Files:**
+- `docker/supervisor/supervisord.conf` - Main Supervisor config
+- `docker/supervisor/laravel-horizon.conf` - Horizon worker config
+
+**Supervisor Commands:**
+```bash
+# Start Horizon via Supervisor
+sudo supervisorctl start laravel-horizon
+
+# Stop Horizon
+sudo supervisorctl stop laravel-horizon
+
+# Restart Horizon
+sudo supervisorctl restart laravel-horizon
+
+# Check status
+sudo supervisorctl status
 ```
 
 ## License
