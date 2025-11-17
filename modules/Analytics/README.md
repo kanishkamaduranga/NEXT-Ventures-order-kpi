@@ -188,7 +188,151 @@ The module automatically updates KPIs and leaderboard when orders are completed:
 - Updates failed orders
 - Does not affect revenue or leaderboard
 
-## API Usage (Programmatic)
+## HTTP API Endpoints
+
+The Analytics module exposes HTTP endpoints for retrieving analytics data.
+
+### Base URL
+All endpoints are prefixed with `/api/v1/analytics`
+
+### Get Daily Report
+```
+GET /api/v1/analytics/daily/{date}
+```
+
+Returns daily KPIs and leaderboard for a specific date.
+
+**Parameters:**
+- `date` (path): Date in YYYY-MM-DD format
+
+**Example:**
+```bash
+curl http://localhost:8088/api/v1/analytics/daily/2025-11-16
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "kpis": {
+      "date": "2025-11-16",
+      "total_revenue": 15234.50,
+      "order_count": 125,
+      "successful_orders": 118,
+      "failed_orders": 7,
+      "average_order_value": 129.11,
+      "conversion_rate": 94.40,
+      "unique_customers": 95,
+      "refund_amount": 0.00
+    },
+    "leaderboard": [
+      {
+        "rank": 1,
+        "customer_id": "1005",
+        "total_spent": 1523.45
+      },
+      {
+        "rank": 2,
+        "customer_id": "1002",
+        "total_spent": 1245.67
+      }
+    ],
+    "date": "2025-11-16",
+    "generated_at": "2025-11-17T09:40:27.932567Z"
+  }
+}
+```
+
+**Error Response:**
+```json
+{
+  "error": "Invalid date format. Expected YYYY-MM-DD"
+}
+```
+Status: 400 Bad Request
+
+### Get Leaderboard
+```
+GET /api/v1/analytics/leaderboard/{date}?limit=10
+```
+
+Returns top customers leaderboard for a specific date.
+
+**Parameters:**
+- `date` (path): Date in YYYY-MM-DD format
+- `limit` (query, optional): Number of top customers to return (default: 10, max: 100)
+
+**Example:**
+```bash
+curl http://localhost:8088/api/v1/analytics/leaderboard/2025-11-16?limit=20
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "date": "2025-11-16",
+    "limit": 20,
+    "leaderboard": [
+      {
+        "rank": 1,
+        "customer_id": "1005",
+        "total_spent": 1523.45
+      },
+      {
+        "rank": 2,
+        "customer_id": "1002",
+        "total_spent": 1245.67
+      }
+    ]
+  }
+}
+```
+
+### Get KPIs for Date Range
+```
+GET /api/v1/analytics/kpis?start_date=2025-11-01&end_date=2025-11-17
+```
+
+Returns aggregated KPIs for a date range.
+
+**Parameters:**
+- `start_date` (query, required): Start date in YYYY-MM-DD format
+- `end_date` (query, optional): End date in YYYY-MM-DD format (default: today)
+
+**Example:**
+```bash
+curl "http://localhost:8088/api/v1/analytics/kpis?start_date=2025-11-01&end_date=2025-11-17"
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "start_date": "2025-11-01",
+    "end_date": "2025-11-17",
+    "total_revenue": 125430.50,
+    "total_order_count": 1250,
+    "total_successful_orders": 1180,
+    "total_failed_orders": 70,
+    "average_order_value": 106.30,
+    "conversion_rate": 94.40,
+    "total_unique_customers": 450,
+    "daily_breakdown": [
+      {
+        "date": "2025-11-01",
+        "total_revenue": 15234.50,
+        "order_count": 125
+      }
+    ]
+  }
+}
+```
+
+## Programmatic API Usage
 
 ### Get Daily KPIs
 
@@ -339,8 +483,6 @@ redis-cli FLUSHDB
 
 ## Dependencies
 
-- Laravel 12.x
-- PHP 8.2+
 - Redis 6.0+ (or compatible)
 - Orders Module (for events)
 
