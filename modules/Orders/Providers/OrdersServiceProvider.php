@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Modules\Orders\Application\Commands\ImportOrdersCommand;
 use Modules\Orders\Application\Commands\ProcessOrderCommand;
+use Modules\Orders\Interfaces\Console\Commands\ListOrdersCommand;
 use Modules\Orders\Domain\Repositories\OrderRepositoryInterface;
 use Modules\Orders\Domain\Services\PaymentGatewayInterface;
 use Modules\Orders\Domain\Services\StockServiceInterface;
@@ -25,6 +26,7 @@ class OrdersServiceProvider extends ServiceProvider
             $this->commands([
                 ImportOrdersCommand::class,
                 ProcessOrderCommand::class,
+                ListOrdersCommand::class,
             ]);
         }
 

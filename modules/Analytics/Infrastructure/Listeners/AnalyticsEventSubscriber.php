@@ -6,6 +6,8 @@ use Modules\Analytics\Application\UseCases\UpdateDailyKpisUseCase;
 use Modules\Analytics\Application\UseCases\UpdateLeaderboardUseCase;
 use Modules\Orders\Domain\Events\OrderCompleted;
 use Modules\Orders\Domain\Events\OrderFailed;
+use Modules\Refunds\Domain\Events\RefundProcessed;
+use Modules\Refunds\Domain\Events\RefundFailed;
 
 class AnalyticsEventSubscriber
 {
@@ -39,23 +41,36 @@ class AnalyticsEventSubscriber
         $this->updateKpisUseCase->execute($date, 0, false);
     }
 
-    // Refund handling can be added when RefundProcessed event is implemented
-    // public function handleRefundProcessed(RefundProcessed $event): void
-    // {
-    //     $refund = $event->refund;
-    //     $order = $event->order;
-    //     $date = $order->created_at->format('Y-m-d');
-    //
-    //     // Update KPIs for refund
-    //     $this->updateKpisUseCase->handleRefund($date, $refund->amount, true);
-    //
-    //     // Update leaderboard for refund
-    //     $this->updateLeaderboardUseCase->handleRefund(
-    //         $order->customer_id,
-    //         $date,
-    //         $refund->amount
-    //     );
-    // }
+    public function handleRefundProcessed(RefundProcessed $event): void
+    {
+        $refund = $event->refund;
+        $order = $event->order;
+        
+        // Use refund processed date, fallback to order date
+        $date = $refund->processed_at 
+            ? $refund->processed_at->format('Y-m-d')
+            : $order->created_at->format('Y-m-d');
+
+        // Update KPIs for refund (decrement revenue, increment refund amount)
+        $this->updateKpisUseCase->handleRefund($date, (float) $refund->amount, true);
+
+        // Update leaderboard for refund (decrement customer spending)
+        $this->updateLeaderboardUseCase->handleRefund(
+            (string) $order->customer_id,
+            $date,
+            (float) $refund->amount
+        );
+    }
+
+    public function handleRefundFailed(RefundFailed $event): void
+    {
+        // Log failed refund but don't update KPIs
+        \Log::warning("Refund failed", [
+            'refund_id' => $event->refund->id,
+            'order_id' => $event->order->id,
+            'reason' => $event->reason,
+        ]);
+    }
 
     public function subscribe(Dispatcher $events): void
     {
@@ -69,10 +84,14 @@ class AnalyticsEventSubscriber
             [AnalyticsEventSubscriber::class, 'handleOrderFailed']
         );
 
-        // Note: RefundProcessed event may not exist yet, so we'll comment it out
-        // $events->listen(
-        //     RefundProcessed::class,
-        //     [AnalyticsEventSubscriber::class, 'handleRefundProcessed']
-        // );
+        $events->listen(
+            RefundProcessed::class,
+            [AnalyticsEventSubscriber::class, 'handleRefundProcessed']
+        );
+
+        $events->listen(
+            RefundFailed::class,
+            [AnalyticsEventSubscriber::class, 'handleRefundFailed']
+        );
     }
 }
