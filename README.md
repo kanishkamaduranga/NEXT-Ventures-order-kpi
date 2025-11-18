@@ -59,7 +59,7 @@ This application provides a comprehensive order processing system with:
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone git@github.com:kanishkamaduranga/NEXT-Ventures-order-kpi.git
 cd NEXT-Ventures-order-kpi
 ```
 
