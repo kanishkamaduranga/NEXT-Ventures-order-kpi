@@ -279,7 +279,7 @@ The module uses two queues:
 
 Make sure your `.env` has:
 ```env
-QUEUE_CONNECTION=database
+QUEUE_CONNECTION=redis
 ```
 
 ## Testing
