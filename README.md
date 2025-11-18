@@ -7,6 +7,7 @@ A Laravel-based order management and analytics system with real-time KPI trackin
 This application provides a comprehensive order processing system with:
 - **Order Management**: Import, process, and track orders through a complete workflow
 - **Real-time Analytics**: Daily KPIs (revenue, order count, AOV) and customer leaderboards
+- **Order Notifications**: Automated email and log notifications for order events
 - **Queue Management**: Laravel Horizon for monitoring and managing Redis queues
 - **Process Management**: Supervisor for keeping queue workers running in production
 - **Event-Driven Architecture**: Decoupled modules using Laravel events
@@ -28,6 +29,13 @@ This application provides a comprehensive order processing system with:
 - Redis-based storage for high performance
 - Historical data tracking (30-day retention)
 - HTTP API endpoints for data retrieval
+
+### Notifications Module
+- Automated notifications for order completion and failures
+- Multiple channels: Email and Log
+- Queued notification jobs to avoid blocking workflow
+- Complete notification history with audit trail
+- Event-driven integration with Orders module
 
 ## Tech Stack
 
@@ -51,7 +59,7 @@ This application provides a comprehensive order processing system with:
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone git@github.com:kanishkamaduranga/NEXT-Ventures-order-kpi.git
 cd NEXT-Ventures-order-kpi
 ```
 
@@ -219,6 +227,7 @@ curl "http://localhost:8088/api/v1/analytics/kpis?start_date=2025-11-01&end_date
 
 - [Orders Module Documentation](modules/Orders/README.md)
 - [Analytics Module Documentation](modules/Analytics/README.md)
+- [Notifications Module Documentation](modules/Notifications/README.md)
 
 ## Development
 
