@@ -224,10 +224,14 @@ return [
             ],
         ],
 
+
         'local' => [
             'supervisor-1' => [
-                'maxProcesses' => 3,
-                'memory' => 128,
+                'connection' => 'redis', // Should match your .env
+                'queue' => ['default'], // Make sure 'default' is here
+                'processes' => 1,
+                'tries' => 1,
+                'timeout' => 60,
             ],
         ],
     ],

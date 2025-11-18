@@ -105,13 +105,16 @@ class RedisAnalyticsRepository implements AnalyticsRepositoryInterface
             // Track unique customer if provided
             if ($customerId !== null) {
                 // Use Lua script to atomically add customer and increment counter if new
+                // Note: In phpredis 6.x, eval() signature is: eval(script, args, num_keys)
+                // Keys must be the first elements of args array
                 $pipe->eval(
                     "local added = redis.call('sadd', KEYS[2], ARGV[1])
                      if added == 1 then
                          redis.call('hincrby', KEYS[1], 'unique_customers', 1)
                      end
                      redis.call('expire', KEYS[2], 2592000)",
-                    2, $key, $customerSetKey, $customerId
+                    [$key, $customerSetKey, $customerId],
+                    2
                 );
             }
 
@@ -150,6 +153,8 @@ class RedisAnalyticsRepository implements AnalyticsRepositoryInterface
         // This would be called after revenue/order count changes
         // In a real implementation, you might want to calculate this on read
         // or use a Lua script for atomic operations
+        // Note: In phpredis 6.x, eval() signature is: eval(script, args, num_keys)
+        // Keys must be the first elements of args array
         $pipe->eval(
             "local revenue = redis.call('hget', KEYS[1], 'total_revenue') or 0
              local orders = redis.call('hget', KEYS[1], 'successful_orders') or 0
@@ -157,7 +162,8 @@ class RedisAnalyticsRepository implements AnalyticsRepositoryInterface
                  local aov = tonumber(revenue) / tonumber(orders)
                  redis.call('hset', KEYS[1], 'average_order_value', aov)
              end",
-            1, $key
+            [$key],
+            1
         );
     }
 
