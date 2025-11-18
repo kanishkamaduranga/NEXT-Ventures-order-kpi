@@ -8,6 +8,7 @@ This application provides a comprehensive order processing system with:
 - **Order Management**: Import, process, and track orders through a complete workflow
 - **Real-time Analytics**: Daily KPIs (revenue, order count, AOV) and customer leaderboards
 - **Order Notifications**: Automated email and log notifications for order events
+- **Refund Handling**: Full and partial refund processing with idempotency guarantees
 - **Queue Management**: Laravel Horizon for monitoring and managing Redis queues
 - **Process Management**: Supervisor for keeping queue workers running in production
 - **Event-Driven Architecture**: Decoupled modules using Laravel events
@@ -36,6 +37,14 @@ This application provides a comprehensive order processing system with:
 - Queued notification jobs to avoid blocking workflow
 - Complete notification history with audit trail
 - Event-driven integration with Orders module
+
+### Refunds Module
+- Full and partial refund processing
+- Asynchronous refund processing via queued jobs
+- Idempotency guarantees to prevent double-processing
+- Real-time analytics updates (KPIs and leaderboard)
+- Payment gateway integration for refund processing
+- Comprehensive refund history and audit trail
 
 ## Tech Stack
 
@@ -123,6 +132,22 @@ php artisan analytics:daily-report [date]
 
 # Backfill KPIs from existing orders
 php artisan analytics:backfill-kpis --days=30
+```
+
+### Refunds
+
+```bash
+# Process a full refund
+php artisan refunds:process {order_id}
+
+# Process a partial refund
+php artisan refunds:process {order_id} --amount=50.00 --type=partial
+
+# List refunds
+php artisan refunds:list
+
+# Filter refunds by order
+php artisan refunds:list --order-id={order_id}
 ```
 
 ## API Endpoints
@@ -213,11 +238,21 @@ curl "http://localhost:8088/api/v1/analytics/kpis?start_date=2025-11-01&end_date
 │   │   ├── Domain/        # Models, events, interfaces
 │   │   ├── Infrastructure/# Repositories, services, migrations
 │   │   └── Interfaces/    # HTTP controllers, console commands
-│   └── Analytics/         # Analytics module
-│       ├── Application/   # Use cases, DTOs
-│       ├── Domain/        # Entities, repositories
-│       ├── Infrastructure/# Redis repositories, listeners
-│       └── Interfaces/    # HTTP controllers, console commands
+│   ├── Analytics/         # Analytics module
+│   │   ├── Application/   # Use cases, DTOs
+│   │   ├── Domain/        # Entities, repositories
+│   │   ├── Infrastructure/# Redis repositories, listeners
+│   │   └── Interfaces/    # HTTP controllers, console commands
+│   ├── Notifications/     # Notifications module
+│   │   ├── Application/   # Jobs, DTOs
+│   │   ├── Domain/        # Models, repositories
+│   │   ├── Infrastructure/# Services, listeners, migrations
+│   │   └── Interfaces/    # Console commands
+│   └── Refunds/           # Refunds module
+│       ├── Application/   # Jobs, DTOs
+│       ├── Domain/        # Models, events, repositories
+│       ├── Infrastructure/# Services, repositories, migrations
+│       └── Interfaces/    # Console commands
 ├── routes/                # Route definitions
 ├── database/              # Migrations, seeders
 └── compose.yaml           # Docker Compose configuration
@@ -228,6 +263,7 @@ curl "http://localhost:8088/api/v1/analytics/kpis?start_date=2025-11-01&end_date
 - [Orders Module Documentation](modules/Orders/README.md)
 - [Analytics Module Documentation](modules/Analytics/README.md)
 - [Notifications Module Documentation](modules/Notifications/README.md)
+- [Refunds Module Documentation](modules/Refunds/README.md)
 
 ## Development
 
